@@ -1,0 +1,21 @@
+compilar proyecto
+gradle build
+
+crear imagen docker
+cd goty-bff/
+gradle build
+
+docker build -t bff-img .
+
+ejecutar imagen docker local
+docker run -d -p 8080:8080 -e URL_BACKEND=http://localhost:2020 bff-img
+
+minikube
+
+minikube ssh
+
+montar mi directorio local en minikube en la ruta /mnt/data
+minikube mount ./shared/server-mock:/mnt/data
+
+kubectl apply -f kubernetes.yaml
+kubectl delete -f kubernates.yaml

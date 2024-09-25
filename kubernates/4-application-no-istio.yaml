@@ -1,0 +1,75 @@
+#backend
+apiVersion: v1
+kind: Service
+metadata:
+  name: mocksserver-service
+  labels:
+    app: mocksserver
+spec:
+  selector:
+    app: mocksserver
+  ports:
+    - protocol: TCP
+      port: 3100
+      targetPort: 3100
+      name: http-port
+    - protocol: TCP
+      port: 3110
+      targetPort: 3110
+      name: second-port
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mocksserver-deployment
+  labels:
+    app: mocksserver
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mocksserver
+  template:
+    metadata:
+      labels:
+        app: mocksserver
+    spec:
+      containers:
+        - name: mocksserver-container
+          image: mocksserver/main
+          ports:
+            - containerPort: 3100
+            - containerPort: 3110
+          env:
+            - name: MOCKS_PATH
+              value: /input
+          volumeMounts:
+            - name: mocks-volume
+              mountPath: /input/mocks
+            - name: mocks-config-volume
+              mountPath: /input/mocks.config.js
+          command: ["npm", "start"]
+      volumes:
+        - name: mocks-volume
+          hostPath:
+            path: /mnt/data/mocks
+            type: Directory
+        - name: mocks-config-volume
+          hostPath:
+            path: /mnt/data/mocks.config.js
+            type: File
+---
+#gff
+apiVersion: v1
+kind: Service
+metadata:
+  name: bff-service
+  labels:
+    app: bff
+spec:
+  selector:
+    app: bff
+    - protocol: TCP
+      port: 3110
+      targetPort: 3110
+      name: second-port

@@ -1,8 +1,0 @@
-compilar proyecto
-gradle build
-
-crear imagen docker
-docker build -t mi-app .
-
-ejecutar imagen docker local
-docker run -d -p 8080:8080 -e URL_BACKEND=http://localhost:2020 mi-app
