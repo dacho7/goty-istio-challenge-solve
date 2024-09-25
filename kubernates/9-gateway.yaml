@@ -1,0 +1,35 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: Gateway
+metadata:
+  name: backend-bff-gateway
+  namespace: default
+spec:
+  selector:
+    istio: ingressgateway
+  servers:
+  - port:
+      number: 80
+      name: http
+      protocol: HTTP
+    hosts:
+    - "*"
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: backend-bff-virtualservice
+  namespace: default
+spec:
+  hosts:
+  - "*"
+  gateways:
+  - backend-bff-gateway
+  http:
+  - match:
+    - uri:
+        prefix: /backend-bff
+    route:
+    - destination:
+        host: backend-bff-service
+        port:
+          number: 5000

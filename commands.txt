@@ -50,6 +50,9 @@ istioctl install --set profile=default -y
 etiqueta namespace
 kubectl label namespace default istio-injection=enabled
 
+istioctl install --set profile=demo
+
+
 verificar instalacion
 kubectl get pods -n istio-system
 
@@ -61,4 +64,19 @@ manifiestos generados por istio
 curl -L https://istio.io/downloadIstio | ISTIO_VERSION=1.20.0 sh -
 cd istio-1.20.0
 export PATH=$PWD/bin:$PATH
+istioctl install --set profile=demo
+
+ver manifiestogenereado por instalacion de istio
 istioctl manifest generate --set profile=demo > istio-init.yaml
+
+
+
+instar istio
+kubectl create ns istio-system
+ejecutar appy de archivo 1
+
+5. Instalar
+Install Kiali, Jeaguer, and Grafana Pluggin in the cluster
+istioctl install --set profile=demo
+
+kubectl port-forward svc/kiali -n istio-system 20001:20001

@@ -1,0 +1,116 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend-bff-v7
+  labels:
+    app: backend-bff
+    version: v7
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: backend-bff
+      version: v7
+  template:
+    metadata:
+      labels:
+        app: backend-bff
+        version: v7
+    spec:
+      containers:
+        - name: backend-bff-container
+          image: dacho7/istio-challenge:v7
+          ports:
+            - containerPort: 8080
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: prod
+            - name: URL_BACKEND
+              value: http://mocksserver-service:3100
+            - name: PORT
+              value: "8080"
+            - name: ENV
+              value: pdn
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend-bff-v9
+  labels:
+    app: backend-bff
+    version: v9
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: backend-bff
+      version: v9
+  template:
+    metadata:
+      labels:
+        app: backend-bff
+        version: v9
+    spec:
+      containers:
+        - name: backend-bff-container
+          image: dacho7/istio-challenge:v9
+          ports:
+            - containerPort: 8080
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: prod
+            - name: URL_BACKEND
+              value: http://mocksserver-service:3100
+            - name: PORT
+              value: "8080"
+            - name: ENV
+              value: pdn
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend-bff-service
+  labels:
+    app: backend-bff
+spec:
+  selector:
+    app: backend-bff
+  ports:
+    - protocol: TCP
+      port: 5000
+      targetPort: 8080
+  type: LoadBalancer
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  name: backend-bff-destinationrule
+spec:
+  host: backend-bff-service
+  subsets:
+    - name: v7
+      labels:
+        version: v7
+    - name: v9
+      labels:
+        version: v9
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: backend-bff-virtualservice
+spec:
+  hosts:
+  - "*"
+  gateways:
+  - backend-gateway # Suponiendo que ya tienes un gateway configurado
+  http:
+  - route:
+    - destination:
+        host: backend-bff-service
+        subset: v7
+      weight: 90
+    - destination:
+        host: backend-bff-service
+        subset: v9
+      weight: 10
