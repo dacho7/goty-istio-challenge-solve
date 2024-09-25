@@ -4,11 +4,17 @@ gradle build
 crear imagen docker
 cd goty-bff/
 gradle build
-
+cd ..
 docker build -t bff-img .
 
 ejecutar imagen docker local
 docker run -d -p 8080:8080 -e URL_BACKEND=http://localhost:2020 bff-img
+
+upload img
+docker login
+docker tag bff-img dacho7/istio-challenge:v1
+docker push dacho7/istio-challenge:v1
+docker run -p 8080:8080 -e ENV=prod -e APP_NAME=goty-ch -e PORT=8081 -e URL_BACKEND=http://localhost:3101 bff-img3
 
 minikube
 
@@ -19,3 +25,40 @@ minikube mount ./shared/server-mock:/mnt/data
 
 kubectl apply -f kubernetes.yaml
 kubectl delete -f kubernates.yaml
+
+acceder a un pod
+kubectl run curl-pod --image=appropriate/curl --restart=Never --rm -it -- /bin/sh
+curl -v http://10.105.231.181:5000/api/goty/products
+
+
+
+
+
+
+descargar istio
+curl -L https://istio.io/downloadIstio | ISTIO_VERSION=1.20.0 sh -
+cd istio-1.20.0
+
+agregar al path
+export PATH=$PWD/bin:$PATH
+
+istioctl version
+
+instalar en minikube
+istioctl install --set profile=default -y
+
+etiqueta namespace
+kubectl label namespace default istio-injection=enabled
+
+verificar instalacion
+kubectl get pods -n istio-system
+
+kubectl get pods
+
+
+manifiestos generados por istio
+
+curl -L https://istio.io/downloadIstio | ISTIO_VERSION=1.20.0 sh -
+cd istio-1.20.0
+export PATH=$PWD/bin:$PATH
+istioctl manifest generate --set profile=demo > istio-init.yaml
